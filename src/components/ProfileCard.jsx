@@ -1,3 +1,4 @@
+import './ProfileCard.css';
 function ProfileCard({ name, codename, favoriteArea, level }) {
   return (
     <section className="profile-card">

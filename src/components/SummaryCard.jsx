@@ -1,3 +1,4 @@
+import './SummaryCard.css';
 function SummaryCard({ title, value, description }) {
   return (
     <article className="summary-card">

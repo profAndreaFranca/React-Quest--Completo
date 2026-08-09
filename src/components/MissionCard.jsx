@@ -1,3 +1,4 @@
+import './MissionCard.css'
 function MissionCard({title ,description ,technology ,difficulty ,xp ,completed ,onToggle ,}) {
   return (
     <article
