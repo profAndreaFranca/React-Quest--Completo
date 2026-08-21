@@ -63,4 +63,8 @@
   cursor: pointer;
 }
 
+.mission-card__button--delete {
+  background: rgba(255, 90, 90, 0.18);
+  color: #ffdede;
+}
 
