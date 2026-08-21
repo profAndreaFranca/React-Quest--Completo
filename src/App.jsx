@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 import ProfileCard from "./components/ProfileCard";
 import SummaryCard from "./components/SummaryCard";
 import MissionCard from "./components/MissionCard";
+import MissionForm from "./components/MissionForm";
 
 const initialMissions = [
   {
@@ -94,6 +95,10 @@ function App() {
     setMissions(updatedMissions);
   }
 
+  function addMission(newMission) {
+    setMissions([...missions, newMission]);
+  }
+
   const completedMissions = missions.filter((mission) => mission.completed);
 
   const completedMissionsCount = completedMissions.length;
@@ -155,6 +160,8 @@ function App() {
           </div>
         </section>
 
+        <MissionForm onAddMission={addMission}/>
+        
         <section className="missions-section">
           <div className="section-heading">
             <div>
