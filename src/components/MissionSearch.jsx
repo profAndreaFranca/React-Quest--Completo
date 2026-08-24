@@ -12,6 +12,16 @@ function MissionSearch({ searchTerm, onSearchChange }) {
         onChange={(event) => onSearchChange(event.target.value)}
         placeholder="Digite o título da missão..."
       />
+
+      {searchTerm && (
+        <button
+          type="button"
+          className="mission-search__clear"
+          onClick={() => onSearchChange("")}
+        >
+          Limpar busca
+        </button>
+      )}
     </section>
   );
 }

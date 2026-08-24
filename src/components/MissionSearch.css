@@ -23,3 +23,15 @@
 .mission-search input::placeholder {
   color: #ffffff80;
 }
+
+.mission-search__clear {
+  align-self: flex-start;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
