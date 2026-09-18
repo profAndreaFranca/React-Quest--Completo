@@ -178,15 +178,15 @@ function App() {
     const matchesDifficulty =
       difficultyFilter === "Todas" || mission.difficulty === difficultyFilter;
 
-    return matchesSearch && matchesStatus && matchesTechnology && matchesDifficulty;
+    return (
+      matchesSearch && matchesStatus && matchesTechnology && matchesDifficulty
+    );
   });
 
-  const sortedMissions =
-  [...filteredMissions].sort(
-    (a, b) => b.xp - a.xp //do maior para o menor
+  const sortedMissions = [...filteredMissions].sort(
+    (a, b) => b.xp - a.xp, //do maior para o menor
     // (a, b) => a.xp - b.xp //do menor para o maior
   );
-
 
   return (
     <main className="app">
@@ -250,20 +250,28 @@ function App() {
           </p>
 
           <div className="missions-grid">
-            {sortedMissions.map((mission) => (
-              <MissionCard
-                key={mission.id}
-                title={mission.title}
-                description={mission.description}
-                technology={mission.technology}
-                difficulty={mission.difficulty}
-                xp={mission.xp}
-                completed={mission.completed}
-                onToggle={() => toggleMission(mission.id)}
-                onEdit={() => setEditingMission(mission)}
-                onDelete={() => deleteMission(mission.id)}
-              />
-            ))}
+            {sortedMissions.length === 0 ? (
+              <div className="empty-state">
+                <h3>Nenhuma missão encontrada</h3>
+
+                <p>Tente alterar sua busca ou seus filtros.</p>
+              </div>
+            ) : (
+              sortedMissions.map((mission) => (
+                <MissionCard
+                  key={mission.id}
+                  title={mission.title}
+                  description={mission.description}
+                  technology={mission.technology}
+                  difficulty={mission.difficulty}
+                  xp={mission.xp}
+                  completed={mission.completed}
+                  onToggle={() => toggleMission(mission.id)}
+                  onEdit={() => setEditingMission(mission)}
+                  onDelete={() => deleteMission(mission.id)}
+                />
+              ))
+            )}
           </div>
         </section>
 
