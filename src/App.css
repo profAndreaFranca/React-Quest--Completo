@@ -82,6 +82,13 @@
   gap: 18px;
 }
 
+.missions-results {
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+
 @media (max-width: 750px) {
   .missions-grid {
     grid-template-columns: 1fr;

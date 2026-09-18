@@ -10,7 +10,6 @@ import MissionForm from "./components/MissionForm";
 import MissionSearch from "./components/MissionSearch";
 import MissionFilters from "./components/MissionFilters";
 
-
 const initialMissions = [
   {
     id: 1,
@@ -88,8 +87,7 @@ function App() {
   const [editingMission, setEditingMission] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todas");
-  const [technologyFilter,setTechnologyFilter] = useState("Todas");
-
+  const [technologyFilter, setTechnologyFilter] = useState("Todas");
 
   //console.log(statusFilter);
 
@@ -164,26 +162,20 @@ function App() {
   ];
 
   const filteredMissions = missions.filter((mission) => {
-    const matchesSearch =
-      mission.title
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+    const matchesSearch = mission.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
     const matchesStatus =
       statusFilter === "Todas" ||
-      (statusFilter === "Concluídas" &&
-        mission.completed) ||
-      (statusFilter === "Pendentes" &&
-        !mission.completed);
+      (statusFilter === "Concluídas" && mission.completed) ||
+      (statusFilter === "Pendentes" && !mission.completed);
 
     const matchesTechnology =
-      technologyFilter === "Todas" ||
-      mission.technology ===
-        technologyFilter;
+      technologyFilter === "Todas" || mission.technology === technologyFilter;
 
     return matchesSearch && matchesStatus && matchesTechnology;
   });
-
 
   return (
     <main className="app">
@@ -232,12 +224,17 @@ function App() {
           <div className="section-heading">
             <div>
               <p className="section-heading__tag">Central de Missões</p>
-
               <h2>Próximos desafios</h2>
             </div>
-
             <span>{missions.length} missões</span>
           </div>
+
+          <p className="missions-results">
+            {filteredMissions.length}{" "}
+            {filteredMissions.length === 1
+              ? "missão encontrada"
+              : "missões encontradas"}
+          </p>
 
           <div className="missions-grid">
             {filteredMissions.map((mission) => (
