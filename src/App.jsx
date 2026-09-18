@@ -9,6 +9,7 @@ import MissionCard from "./components/MissionCard";
 import MissionForm from "./components/MissionForm";
 import MissionSearch from "./components/MissionSearch";
 import MissionFilters from "./components/MissionFilters";
+import ProjectCard from "./components/ProjectCard";
 
 const initialMissions = [
   {
@@ -46,6 +47,31 @@ const initialMissions = [
     difficulty: "Média",
     xp: 80,
     completed: false,
+  },
+];
+
+const initialProjects = [
+  {
+    id: 1,
+    title: "Desenho com Gestos",
+    description: "Aplicação que permite desenhar usando movimentos das mãos.",
+    technologies: ["Python", "OpenCV", "MediaPipe"],
+    status: "Concluído",
+  },
+  {
+    id: 2,
+    title: "Detector de Invasores",
+    description: "Jogo desenvolvido em Python com detecção e interação.",
+    technologies: ["Python", "Pygame"],
+    status: "Concluído",
+  },
+  {
+    id: 3,
+    title: "Loja Virtual com IA",
+    description:
+      "Loja virtual que utiliza inteligência artificial para auxiliar o usuário.",
+    technologies: ["Python", "Flask", "HTML", "CSS"],
+    status: "Concluído",
   },
 ];
 
@@ -184,28 +210,30 @@ function App() {
     );
   });
 
-  const sortedMissions =
-  [...filteredMissions].sort(
-    (a, b) => {
-      if (sortOrder === "Menor XP") {
-        return a.xp - b.xp; //menor para o maior
-      }
-
-      return b.xp - a.xp; //maior para o menor
+  const sortedMissions = [...filteredMissions].sort((a, b) => {
+    if (sortOrder === "Menor XP") {
+      return a.xp - b.xp; //menor para o maior
     }
-  );
 
+    return b.xp - a.xp; //maior para o menor
+  });
 
   return (
     <main className="app">
       <Header />
       <div className="dashboard">
+
+         <Welcome />
+         
         <ProfileCard
           name="Andrea"
           codename="CodeMaster"
           favoriteArea="Desenvolvimento Web"
           level="Aprendiz React"
         />
+
+       
+
         <section className="summary-section">
           <h2>Resumo da jornada</h2>
 
@@ -285,7 +313,33 @@ function App() {
           </div>
         </section>
 
-        <Welcome />
+        <section className="projects-section">
+          <div className="projects-section__header">
+            <div>
+              <span className="section-eyebrow">Portfólio</span>
+
+              <h2>Central de Projetos</h2>
+
+              <p>
+                Projetos construídos durante sua jornada como desenvolvedor.
+              </p>
+            </div>
+          </div>
+
+          <div className="projects-grid">
+            {initialProjects.map((project) => (
+              <ProjectCard
+                key={project.id}
+                title={project.title}
+                description={project.description}
+                technologies={project.technologies}
+                status={project.status}
+              />
+            ))}
+          </div>
+        </section>
+
+        
       </div>
       <Footer />
     </main>
