@@ -181,6 +181,13 @@ function App() {
     return matchesSearch && matchesStatus && matchesTechnology && matchesDifficulty;
   });
 
+  const sortedMissions =
+  [...filteredMissions].sort(
+    (a, b) => b.xp - a.xp //do maior para o menor
+    // (a, b) => a.xp - b.xp //do menor para o maior
+  );
+
+
   return (
     <main className="app">
       <Header />
@@ -243,7 +250,7 @@ function App() {
           </p>
 
           <div className="missions-grid">
-            {filteredMissions.map((mission) => (
+            {sortedMissions.map((mission) => (
               <MissionCard
                 key={mission.id}
                 title={mission.title}
