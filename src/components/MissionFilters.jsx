@@ -1,13 +1,15 @@
 import "./MissionFilters.css";
 
-function MissionFilters({ 
-  statusFilter, 
-  onStatusChange,  
+function MissionFilters({
+  statusFilter,
+  onStatusChange,
   technologyFilter,
   onTechnologyChange,
   difficultyFilter,
   onDifficultyChange,
- }) {
+  sortOrder,
+  setSortOrder,
+}) {
   return (
     <section className="mission-filters">
       <div className="mission-filters__group">
@@ -53,6 +55,19 @@ function MissionFilters({
           <option value="Fácil">Fácil</option>
           <option value="Média">Média</option>
           <option value="Difícil">Difícil</option>
+        </select>
+      </div>
+      <div className="mission-filters__group">
+        <label htmlFor="sort-order">Ordenar</label>
+
+        <select
+          id="sort-order"
+          value={sortOrder}
+          onChange={(event) => setSortOrder(event.target.value)}
+        >
+          <option value="Maior XP">Maior XP</option>
+
+          <option value="Menor XP">Menor XP</option>
         </select>
       </div>
     </section>

@@ -89,6 +89,7 @@ function App() {
   const [statusFilter, setStatusFilter] = useState("Todas");
   const [technologyFilter, setTechnologyFilter] = useState("Todas");
   const [difficultyFilter, setDifficultyFilter] = useState("Todas");
+  const [sortOrder, setSortOrder] = useState("Maior XP");
 
   //console.log(statusFilter);
 
@@ -183,10 +184,17 @@ function App() {
     );
   });
 
-  const sortedMissions = [...filteredMissions].sort(
-    (a, b) => b.xp - a.xp, //do maior para o menor
-    // (a, b) => a.xp - b.xp //do menor para o maior
+  const sortedMissions =
+  [...filteredMissions].sort(
+    (a, b) => {
+      if (sortOrder === "Menor XP") {
+        return a.xp - b.xp; //menor para o maior
+      }
+
+      return b.xp - a.xp; //maior para o menor
+    }
   );
+
 
   return (
     <main className="app">
@@ -232,6 +240,8 @@ function App() {
             onTechnologyChange={setTechnologyFilter}
             difficultyFilter={difficultyFilter}
             onDifficultyChange={setDifficultyFilter}
+            sortOrder={sortOrder}
+            setSortOrder={setSortOrder}
           />
 
           <div className="section-heading">
