@@ -323,8 +323,19 @@ function App() {
 
               <h2>Central de Projetos</h2>
 
+              
+
+
               <p>
                 Projetos construídos durante sua jornada como desenvolvedor.
+              </p>
+
+              <p className="projects-count">
+                {projects.length}
+                {" "}
+                {projects.length === 1
+                  ? "projeto cadastrado"
+                  : "projetos cadastrados"}
               </p>
             </div>
           </div>
