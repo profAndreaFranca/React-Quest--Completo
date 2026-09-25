@@ -10,6 +10,7 @@ import MissionForm from "./components/MissionForm";
 import MissionSearch from "./components/MissionSearch";
 import MissionFilters from "./components/MissionFilters";
 import ProjectCard from "./components/ProjectCard";
+import ProjectForm from "./components/ProjectForm";
 
 const initialMissions = [
   {
@@ -116,6 +117,7 @@ function App() {
   const [technologyFilter, setTechnologyFilter] = useState("Todas");
   const [difficultyFilter, setDifficultyFilter] = useState("Todas");
   const [sortOrder, setSortOrder] = useState("Maior XP");
+  const [projects, setProjects] = useState(initialProjects);
 
   //console.log(statusFilter);
 
@@ -151,6 +153,10 @@ function App() {
     );
 
     setMissions(updatedMissions);
+  }
+
+  function addProject(newProject) {
+    setProjects([...projects, newProject]);
   }
 
   const completedMissions = missions.filter((mission) => mission.completed);
@@ -222,17 +228,14 @@ function App() {
     <main className="app">
       <Header />
       <div className="dashboard">
+        <Welcome />
 
-         <Welcome />
-         
         <ProfileCard
           name="Andrea"
           codename="CodeMaster"
           favoriteArea="Desenvolvimento Web"
           level="Aprendiz React"
         />
-
-       
 
         <section className="summary-section">
           <h2>Resumo da jornada</h2>
@@ -326,8 +329,13 @@ function App() {
             </div>
           </div>
 
+          <ProjectForm
+            onAddProject={addProject}
+          />
+
+
           <div className="projects-grid">
-            {initialProjects.map((project) => (
+            {projects.map((project) => (
               <ProjectCard
                 key={project.id}
                 title={project.title}
@@ -338,8 +346,6 @@ function App() {
             ))}
           </div>
         </section>
-
-        
       </div>
       <Footer />
     </main>
