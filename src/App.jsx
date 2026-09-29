@@ -118,6 +118,7 @@ function App() {
   const [difficultyFilter, setDifficultyFilter] = useState("Todas");
   const [sortOrder, setSortOrder] = useState("Maior XP");
   const [projects, setProjects] = useState(initialProjects);
+  const [editingProject, setEditingProject] = useState(null);
 
   //console.log(statusFilter);
 
@@ -157,6 +158,24 @@ function App() {
 
   function addProject(newProject) {
     setProjects([...projects, newProject]);
+  }
+
+  function deleteProject(projectId) {
+    const updatedProjects = projects.filter(
+      (project) => project.id !== projectId,
+    );
+
+    setProjects(updatedProjects);
+  }
+
+  function updateProject(updatedProject) {
+    const updatedProjects = projects.map((project) =>
+      project.id === updatedProject.id ? updatedProject : project,
+    );
+
+    setProjects(updatedProjects);
+
+    setEditingProject(null);
   }
 
   const completedMissions = missions.filter((mission) => mission.completed);
@@ -323,16 +342,12 @@ function App() {
 
               <h2>Central de Projetos</h2>
 
-              
-
-
               <p>
                 Projetos construídos durante sua jornada como desenvolvedor.
               </p>
 
               <p className="projects-count">
-                {projects.length}
-                {" "}
+                {projects.length}{" "}
                 {projects.length === 1
                   ? "projeto cadastrado"
                   : "projetos cadastrados"}
@@ -342,8 +357,9 @@ function App() {
 
           <ProjectForm
             onAddProject={addProject}
+            editingProject={editingProject}
+            onUpdateProject={updateProject}
           />
-
 
           <div className="projects-grid">
             {projects.map((project) => (
@@ -353,6 +369,8 @@ function App() {
                 description={project.description}
                 technologies={project.technologies}
                 status={project.status}
+                onEdit={() => setEditingProject(project)}
+                onDelete={() => deleteProject(project.id)}
               />
             ))}
           </div>
