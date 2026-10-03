@@ -45,12 +45,14 @@
 
 .project-card__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 8px;
 }
 
 .project-card__edit,
-.project-card__delete {
+.project-card__delete,
+.project-card__link {
   padding: 8px 12px;
   border: none;
   border-radius: 8px;
@@ -68,13 +70,20 @@
   color: inherit;
 }
 
+.project-card__link {
+  background: rgba(255, 255, 255, 0.1);
+  color: inherit;
+  text-decoration: none;
+}
+
 .project-card__delete {
   background: #dc3545;
   color: #ffffff;
 }
 
 .project-card__edit:hover,
-.project-card__delete:hover {
+.project-card__delete:hover,
+.project-card__link:hover {
   transform: translateY(-1px);
   opacity: 0.9;
 }

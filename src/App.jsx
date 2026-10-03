@@ -58,6 +58,8 @@ const initialProjects = [
     description: "Aplicação que permite desenhar usando movimentos das mãos.",
     technologies: ["Python", "OpenCV", "MediaPipe"],
     status: "Concluído",
+    githubUrl: "https://github.com/usuario/desenho-com-gestos",
+    deployUrl: "",
   },
   {
     id: 2,
@@ -65,6 +67,8 @@ const initialProjects = [
     description: "Jogo desenvolvido em Python com detecção e interação.",
     technologies: ["Python", "Pygame"],
     status: "Concluído",
+    githubUrl: "https://github.com/usuario/detector-de-invasores",
+    deployUrl: "",
   },
   {
     id: 3,
@@ -73,41 +77,10 @@ const initialProjects = [
       "Loja virtual que utiliza inteligência artificial para auxiliar o usuário.",
     technologies: ["Python", "Flask", "HTML", "CSS"],
     status: "Concluído",
+    githubUrl: "https://github.com/usuario/loja-virtual-com-ia",
+    deployUrl: "https://loja-virtual-com-ia.example.com",
   },
 ];
-
-// const summaryData = [
-//   {
-//     id: 1,
-//     title: "Missões",
-//     value: 5,
-//     description: "Desafios disponíveis",
-//   },
-//   {
-//     id: 2,
-//     title: "Projetos",
-//     value: 3,
-//     description: "Projetos cadastrados",
-//   },
-//   {
-//     id: 3,
-//     title: "Tecnologias",
-//     value: 6,
-//     description: "Tecnologias praticadas",
-//   },
-//   {
-//     id: 4,
-//     title: "XP",
-//     value: 150,
-//     description: "Experiência acumulada",
-//   },
-//   {
-//     id: 5,
-//     title: "Conquistas",
-//     value: 2,
-//     description: "Conquistas desbloqueadas",
-//   },
-// ];
 
 function App() {
   const [missions, setMissions] = useState(initialMissions);
@@ -122,6 +95,7 @@ function App() {
 
   //console.log(statusFilter);
 
+  // Funções para manipular missões
   function toggleMission(missionId) {
     const updatedMissions = missions.map((mission) => {
       if (mission.id === missionId) {
@@ -155,7 +129,7 @@ function App() {
 
     setMissions(updatedMissions);
   }
-
+  // Funções para manipular projetos
   function addProject(newProject) {
     setProjects([...projects, newProject]);
   }
@@ -197,6 +171,16 @@ function App() {
     0,
   );
 
+  const projectTechnologies = [];
+
+  projects.forEach((project) => {
+    project.technologies.forEach((technology) => {
+      if (technology && !projectTechnologies.includes(technology)) {
+        projectTechnologies.push(technology);
+      }
+    });
+  });
+
   const summaryData = [
     {
       id: 1,
@@ -207,13 +191,13 @@ function App() {
     {
       id: 2,
       title: "Projetos",
-      value: 3,
+      value: projects.length,
       description: "Projetos cadastrados",
     },
     {
       id: 3,
       title: "Tecnologias",
-      value: 6,
+      value: projectTechnologies.length,
       description: "Tecnologias praticadas",
     },
     {
@@ -379,6 +363,8 @@ function App() {
                 description={project.description}
                 technologies={project.technologies}
                 status={project.status}
+                githubUrl={project.githubUrl}
+                deployUrl={project.deployUrl}
                 onEdit={() => setEditingProject(project)}
                 onDelete={() => deleteProject(project.id)}
               />

@@ -6,6 +6,8 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
   const [description, setDescription] = useState("");
   const [technologies, setTechnologies] = useState("");
   const [status, setStatus] = useState("Em andamento");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [deployUrl, setDeployUrl] = useState("");
 
   useEffect(() => {
     if (editingProject) {
@@ -13,11 +15,21 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
       setDescription(editingProject.description);
       setTechnologies(editingProject.technologies.join(", "));
       setStatus(editingProject.status);
+      setGithubUrl(editingProject.githubUrl || "");
+      setDeployUrl(editingProject.deployUrl || "");
     }
   }, [editingProject]);
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    if (
+      (githubUrl && !githubUrl.startsWith("http://") && !githubUrl.startsWith("https://")) ||
+      (deployUrl && !deployUrl.startsWith("http://") && !deployUrl.startsWith("https://"))
+    ) {
+      alert("As URLs devem começar com http:// ou https://. Você também pode deixar os campos vazios.");
+      return;
+    }
 
     const newProject = {
       id: Date.now(),
@@ -25,6 +37,8 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
       description,
       technologies: technologies.split(",").map((tech) => tech.trim()),
       status,
+      githubUrl,
+      deployUrl,
     };
 
     if (editingProject) {
@@ -40,6 +54,8 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
     setDescription("");
     setTechnologies("");
     setStatus("Em andamento");
+    setGithubUrl("");
+    setDeployUrl("");
   }
 
   return (
@@ -90,6 +106,28 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
             <option value="Em andamento">Em andamento</option>
             <option value="Concluído">Concluído</option>
           </select>
+        </div>
+
+        <div className="project-form__group">
+          <label htmlFor="project-github-url">URL do GitHub</label>
+          <input
+            id="project-github-url"
+            type="text"
+            value={githubUrl}
+            onChange={(event) => setGithubUrl(event.target.value)}
+            placeholder="https://github.com/usuario/projeto"
+          />
+        </div>
+
+        <div className="project-form__group">
+          <label htmlFor="project-deploy-url">URL do projeto publicado</label>
+          <input
+            id="project-deploy-url"
+            type="text"
+            value={deployUrl}
+            onChange={(event) => setDeployUrl(event.target.value)}
+            placeholder="https://meuprojeto.vercel.app"
+          />
         </div>
 
         <button type="submit" className="project-form__button">
