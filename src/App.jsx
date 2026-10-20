@@ -11,6 +11,7 @@ import MissionSearch from "./components/MissionSearch";
 import MissionFilters from "./components/MissionFilters";
 import ProjectCard from "./components/ProjectCard";
 import ProjectForm from "./components/ProjectForm";
+import SkillCard from "./components/SkillCard";
 
 const initialMissions = [
   {
@@ -92,8 +93,6 @@ function App() {
   const [sortOrder, setSortOrder] = useState("Maior XP");
   const [projects, setProjects] = useState(initialProjects);
   const [editingProject, setEditingProject] = useState(null);
-
-  //console.log(statusFilter);
 
   // Funções para manipular missões
   function toggleMission(missionId) {
@@ -180,6 +179,25 @@ function App() {
       }
     });
   });
+
+  const completedProjects = projects.filter(
+    (project) => project.status === "Concluído",
+  );
+
+  const technologyXP = {};
+
+  completedProjects.forEach((project) => {
+    project.technologies.forEach((technology) => {
+      technologyXP[technology] = (technologyXP[technology] || 0) + 50;
+    });
+  });
+
+  const skills = Object.entries(technologyXP).map(([technology, xp]) => ({
+    technology,
+    xp,
+  }));
+
+  const hasSkillAchievement = skills.some((skill) => skill.xp >= 100);
 
   const summaryData = [
     {
@@ -370,6 +388,35 @@ function App() {
               />
             ))}
           </div>
+        </section>
+        <section className="skills-section">
+          <div className="skills-section__header">
+            <span className="section-eyebrow">Evolução Dev</span>
+            <h2>Régua de Evolução</h2>
+            <p>
+              Veja como seus projetos estão desenvolvendo suas habilidades.
+            </p>
+          </div>
+
+          <div className="skills-grid">
+            {skills.map((skill) => (
+              <SkillCard
+                key={skill.technology}
+                technology={skill.technology}
+                xp={skill.xp}
+              />
+            ))}
+          </div>
+
+          {hasSkillAchievement && (
+            <div className="achievement">
+              <span>🏆</span>
+              <div>
+                <strong>Especialista Iniciante</strong>
+                <p>Você alcançou 100 XP em uma tecnologia.</p>
+              </div>
+            </div>
+          )}
         </section>
       </div>
       <Footer />
