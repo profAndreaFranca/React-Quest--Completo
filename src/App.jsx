@@ -198,6 +198,7 @@ function App() {
   }));
 
   const hasSkillAchievement = skills.some((skill) => skill.xp >= 100);
+  const isExplorer = skills.length >= 3;
 
   const summaryData = [
     {
@@ -414,6 +415,16 @@ function App() {
               <div>
                 <strong>Especialista Iniciante</strong>
                 <p>Você alcançou 100 XP em uma tecnologia.</p>
+              </div>
+            </div>
+          )}
+
+          {isExplorer && (
+            <div className="achievement">
+              <span>🧭</span>
+              <div>
+                <strong>Explorador Dev</strong>
+                <p>Você já explorou pelo menos 3 tecnologias diferentes.</p>
               </div>
             </div>
           )}
