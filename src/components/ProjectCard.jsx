@@ -1,6 +1,15 @@
 import "./ProjectCard.css";
 
-function ProjectCard({ title, description, technologies, status, githubUrl, deployUrl, onDelete, onEdit}) {
+function ProjectCard({
+  title,
+  description,
+  technologies,
+  status,
+  githubUrl,
+  deployUrl,
+  onDelete,
+  onEdit,
+}) {
   return (
     <article className="project-card">
       <span className="project-card__status">{status}</span>
@@ -18,13 +27,23 @@ function ProjectCard({ title, description, technologies, status, githubUrl, depl
       </div>
       <div className="project-card__actions">
         {githubUrl && (
-          <a className="project-card__link" href={githubUrl} target="_blank" rel="noreferrer">
+          <a
+            className="project-card__link"
+            href={githubUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             GitHub
           </a>
         )}
 
         {deployUrl && (
-          <a className="project-card__link" href={deployUrl} target="_blank" rel="noreferrer">
+          <a
+            className="project-card__link"
+            href={deployUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             Ver projeto
           </a>
         )}
@@ -33,11 +52,7 @@ function ProjectCard({ title, description, technologies, status, githubUrl, depl
           Editar
         </button>
 
-        <button
-          type="button"
-          className="project-card__delete"
-          onClick={onDelete}
-        >
+        <button type="button" className="project-card__delete" onClick={onDelete}>
           Excluir
         </button>
       </div>
