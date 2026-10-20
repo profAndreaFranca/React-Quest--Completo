@@ -1,4 +1,5 @@
 import './Header.css';
+import { NavLink } from "react-router";
 function Header() {
   return (
     <header className="header">
@@ -9,7 +10,7 @@ function Header() {
         </span>
       </div>
 
-      <button className="header__button">Meu perfil</button>
+      <NavLink to="/profile" className="header__button">Meu perfil</NavLink>
     </header>
   );
 }

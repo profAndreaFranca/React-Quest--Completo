@@ -8,6 +8,7 @@ function Navigation() {
       <NavLink to="/missions">Missões</NavLink>
       <NavLink to="/projects">Projetos</NavLink>
       <NavLink to="/evolution">Evolução</NavLink>
+      <NavLink to="/profile">Perfil</NavLink>
     </nav>
   );
 }

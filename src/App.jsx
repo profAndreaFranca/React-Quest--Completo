@@ -5,6 +5,7 @@ import DashboardPage from "./pages/DashboardPage";
 import MissionsPage from "./pages/MissionsPage";
 import ProjectsPage from "./pages/ProjectsPage";
 import EvolutionPage from "./pages/EvolutionPage";
+import ProfilePage from "./pages/ProfilePage";
 import "./App.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -268,6 +269,7 @@ function App() {
       <Navigation />
       <div className="dashboard">
         <Routes>
+          <Route path="/profile" element={<ProfilePage />} />
           <Route
             path="/"
             element={
