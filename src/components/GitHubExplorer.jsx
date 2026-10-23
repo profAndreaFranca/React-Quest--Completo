@@ -58,6 +58,10 @@ function GitHubExplorer() {
     }
   }
 
+  const sortedRepositories = [...repositories].sort(
+    (a, b) => b.stargazers_count - a.stargazers_count,
+  );
+
   return (
     <section className="github-explorer">
       <h2>Explorador GitHub</h2>
@@ -92,7 +96,7 @@ function GitHubExplorer() {
       )}
       {!loading && !error && (
         <div className="github-repositories">
-          {repositories.map((repository) => (
+          {sortedRepositories.map((repository) => (
             <GitHubRepoCard key={repository.id} repository={repository} />
           ))}
         </div>
