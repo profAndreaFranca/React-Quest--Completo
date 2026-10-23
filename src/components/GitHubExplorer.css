@@ -1,0 +1,43 @@
+.github-explorer {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.github-explorer__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.github-explorer__form input {
+  flex: 1;
+  min-width: 200px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #666;
+}
+
+.github-explorer__form button {
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.github-explorer__form button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.github-repositories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.github-error {
+  color: #ff9b9b;
+}
