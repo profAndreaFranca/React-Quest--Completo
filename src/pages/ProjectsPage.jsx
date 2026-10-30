@@ -9,6 +9,7 @@ function ProjectsPage({
   updateProject,
   deleteProject,
   setEditingProject,
+  importRepository,
 }) {
   return (
     <>
@@ -53,7 +54,10 @@ function ProjectsPage({
             />
           ))}
         </div>
-        <GitHubExplorer />
+        <GitHubExplorer
+          projects={projects}
+          onImportRepository={importRepository}
+        />
       </section>
     </>
   );

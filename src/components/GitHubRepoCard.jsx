@@ -1,6 +1,6 @@
 import "./GitHubRepoCard.css";
 
-function GitHubRepoCard({ repository }) {
+function GitHubRepoCard({ repository, onImport, isImported }) {
   return (
     <article className="github-repo-card">
       <h3>{repository.name}</h3>
@@ -16,6 +16,14 @@ function GitHubRepoCard({ repository }) {
       >
         Ver no GitHub
       </a>
+      <button
+        type="button"
+        onClick={() => onImport(repository)}
+        disabled={isImported}
+        className="github-repo-card__import"
+      >
+        {isImported ? "✓ Já importado" : "Importar para o portfólio"}
+      </button>
     </article>
   );
 }

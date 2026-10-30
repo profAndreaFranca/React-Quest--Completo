@@ -30,3 +30,25 @@
   color: inherit;
   font-weight: 700;
 }
+
+.github-repo-card__import {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: #8b5cf6;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.github-repo-card__import:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.github-repo-card__import:disabled {
+  background: #475569;
+  color: #cbd5e1;
+  cursor: default;
+}

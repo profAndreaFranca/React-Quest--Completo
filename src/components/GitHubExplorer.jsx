@@ -2,7 +2,7 @@ import { useState } from "react";
 import GitHubRepoCard from "./GitHubRepoCard";
 import "./GitHubExplorer.css";
 
-function GitHubExplorer() {
+function GitHubExplorer({ projects, onImportRepository }) {
   const [username, setUsername] = useState("profAndreaFranca");
   const [repositories, setRepositories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,6 +62,17 @@ function GitHubExplorer() {
     (a, b) => b.stargazers_count - a.stargazers_count,
   );
 
+  function handleImport(repository) {
+    const imported = onImportRepository(repository);
+
+    if (!imported) {
+      window.alert("Este repositório já está no portfólio.");
+      return;
+    }
+
+    window.alert("Projeto importado com sucesso!");
+  }
+
   return (
     <section className="github-explorer">
       <h2>Explorador GitHub</h2>
@@ -96,9 +107,29 @@ function GitHubExplorer() {
       )}
       {!loading && !error && (
         <div className="github-repositories">
-          {sortedRepositories.map((repository) => (
-            <GitHubRepoCard key={repository.id} repository={repository} />
-          ))}
+          {sortedRepositories.map((repository) => {
+            const normalizeUrl = (url) =>
+              (url || "")
+                .trim()
+                .replace(/\/+$/, "")
+                .replace(/\.git$/i, "")
+                .toLowerCase();
+
+            const isImported = projects.some(
+              (project) =>
+                normalizeUrl(project.githubUrl) ===
+                normalizeUrl(repository.html_url),
+            );
+
+            return (
+              <GitHubRepoCard
+                key={repository.id}
+                repository={repository}
+                onImport={handleImport}
+                isImported={isImported}
+              />
+            );
+          })}
         </div>
       )}
     </section>

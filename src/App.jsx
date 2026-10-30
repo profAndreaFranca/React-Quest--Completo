@@ -90,6 +90,18 @@ const initialProjects = [
   },
 ];
 
+function createProjectFromRepository(repository) {
+  return {
+    id: crypto.randomUUID(),
+    title: repository.name,
+    description: repository.description || "Projeto importado do GitHub.",
+    technologies: repository.language ? [repository.language] : [],
+    status: "Em andamento",
+    githubUrl: repository.html_url,
+    deployUrl: "",
+  };
+}
+
 function App() {
   const [missions, setMissions] = useState(initialMissions);
   const [editingMission, setEditingMission] = useState(null);
@@ -138,6 +150,29 @@ function App() {
   // Funções para manipular projetos
   function addProject(newProject) {
     setProjects([...projects, newProject]);
+  }
+
+  function importRepository(repository) {
+    const normalizeUrl = (url) =>
+      (url || "")
+        .trim()
+        .replace(/\/+$/, "")
+        .replace(/\.git$/i, "")
+        .toLowerCase();
+
+    const repositoryUrl = normalizeUrl(repository.html_url);
+
+    const alreadyExists = projects.some(
+      (project) => normalizeUrl(project.githubUrl) === repositoryUrl,
+    );
+
+    if (alreadyExists) {
+      return false;
+    }
+
+    const newProject = createProjectFromRepository(repository);
+    addProject(newProject);
+    return true;
   }
 
   function deleteProject(projectId) {
@@ -314,6 +349,7 @@ function App() {
                 updateProject={updateProject}
                 deleteProject={deleteProject}
                 setEditingProject={setEditingProject}
+                importRepository={importRepository}
               />
             }
           />
