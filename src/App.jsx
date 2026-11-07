@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "./services/supabaseClient";
 import { Routes, Route } from "react-router";
 import Navigation from "./components/Navigation";
 import DashboardPage from "./pages/DashboardPage";
@@ -9,86 +10,6 @@ import ProfilePage from "./pages/ProfilePage";
 import "./App.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
-const initialMissions = [
-  {
-    id: 1,
-    title: "Criar componente de perfil",
-    description: "Monte um card com nome, codinome e área favorita.",
-    technology: "React",
-    difficulty: "Fácil",
-    xp: 50,
-    completed: true,
-  },
-  {
-    id: 2,
-    title: "Reutilizar um componente",
-    description: "Use o mesmo componente para exibir dados diferentes.",
-    technology: "React",
-    difficulty: "Fácil",
-    xp: 50,
-    completed: true,
-  },
-  {
-    id: 3,
-    title: "Criar a Central de Missões",
-    description: "Exiba uma lista de missões utilizando componentes.",
-    technology: "React",
-    difficulty: "Média",
-    xp: 100,
-    completed: false,
-  },
-  {
-    id: 4,
-    title: "Investigar um erro",
-    description: "Encontre e corrija um problema de props ou estado.",
-    technology: "Debug",
-    difficulty: "Média",
-    xp: 80,
-    completed: false,
-  },
-];
-
-const initialProjects = [
-  {
-    id: 1,
-    title: "Desenho com Gestos",
-    description: "Aplicação que permite desenhar usando movimentos das mãos.",
-    technologies: ["Python", "OpenCV", "MediaPipe"],
-    status: "Concluído",
-    githubUrl: "https://github.com/usuario/desenho-com-gestos",
-    deployUrl: "",
-  },
-  {
-    id: 2,
-    title: "Detector de Invasores",
-    description: "Jogo desenvolvido em Python com detecção e interação.",
-    technologies: ["Python", "Pygame"],
-    status: "Concluído",
-    githubUrl: "https://github.com/usuario/detector-de-invasores",
-    deployUrl: "",
-  },
-  {
-    id: 3,
-    title: "Loja Virtual com IA",
-    description:
-      "Loja virtual que utiliza inteligência artificial para auxiliar o usuário.",
-    technologies: ["Python", "Flask", "HTML", "CSS"],
-    status: "Concluído",
-    githubUrl: "https://github.com/usuario/loja-virtual-com-ia",
-    deployUrl: "https://loja-virtual-com-ia.example.com",
-  },
-  {
-    id: 4,
-    title: "React Quest",
-    description:
-      "Plataforma de aprendizado para devs em React com missões, projetos e gamificação.",
-    technologies: ["Vite", "React", "HTML", "CSS", "JavaScript"],
-    status: "Em andamento",
-    githubUrl: "https://github.com/profAndreaFranca/React-Quest--Completo.git",
-    deployUrl: "https://react-quest-completo.vercel.app/",
-  },
-];
 
 function createProjectFromRepository(repository) {
   return {
@@ -103,15 +24,74 @@ function createProjectFromRepository(repository) {
 }
 
 function App() {
-  const [missions, setMissions] = useState(initialMissions);
+  const [missions, setMissions] = useState([]);
   const [editingMission, setEditingMission] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todas");
   const [technologyFilter, setTechnologyFilter] = useState("Todas");
   const [difficultyFilter, setDifficultyFilter] = useState("Todas");
   const [sortOrder, setSortOrder] = useState("Maior XP");
-  const [projects, setProjects] = useState(initialProjects);
+  const [projects, setProjects] = useState([]);
   const [editingProject, setEditingProject] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadData() {
+      setLoading(true);
+      setLoadError("");
+
+      try {
+        const [projectsResult, missionsResult] = await Promise.all([
+          supabase.from("projects").select("*").order("created_at", { ascending: true }),
+          supabase.from("missions").select("*").order("created_at", { ascending: true }),
+        ]);
+
+        if (projectsResult.error) throw projectsResult.error;
+        if (missionsResult.error) throw missionsResult.error;
+
+        const formattedProjects = (projectsResult.data || []).map((project) => ({
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          technologies: project.technologies || [],
+          status: project.status,
+          githubUrl: project.github_url || "",
+          deployUrl: project.deploy_url || "",
+        }));
+
+        const formattedMissions = (missionsResult.data || []).map((mission) => ({
+          id: mission.id,
+          title: mission.title,
+          description: mission.description,
+          technology: mission.technology,
+          difficulty: mission.difficulty,
+          xp: mission.xp,
+          completed: mission.completed,
+        }));
+
+        if (!active) return;
+        setProjects(formattedProjects);
+        setMissions(formattedMissions);
+      } catch (error) {
+        if (active) {
+          setLoadError(
+            error instanceof Error ? error.message : "Erro ao carregar os dados.",
+          );
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+
+    loadData();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Funções para manipular missões
   function toggleMission(missionId) {
@@ -303,67 +283,75 @@ function App() {
       <Header />
       <Navigation />
       <div className="dashboard">
-        <Routes>
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route
-            path="/"
-            element={
-              <DashboardPage
-                summaryData={summaryData}
-              />
-            }
-          />
-          <Route
-            path="/missions"
-            element={
-              <MissionsPage
-                missions={missions}
-                editingMission={editingMission}
-                addMission={addMission}
-                updateMission={updateMission}
-                deleteMission={deleteMission}
-                toggleMission={toggleMission}
-                setEditingMission={setEditingMission}
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
-                technologyFilter={technologyFilter}
-                setTechnologyFilter={setTechnologyFilter}
-                difficultyFilter={difficultyFilter}
-                setDifficultyFilter={setDifficultyFilter}
-                sortOrder={sortOrder}
-                setSortOrder={setSortOrder}
-                filteredMissions={filteredMissions}
-                sortedMissions={sortedMissions}
-              />
-            }
-          />
-          <Route
-            path="/projects"
-            element={
-              <ProjectsPage
-                projects={projects}
-                editingProject={editingProject}
-                addProject={addProject}
-                updateProject={updateProject}
-                deleteProject={deleteProject}
-                setEditingProject={setEditingProject}
-                importRepository={importRepository}
-              />
-            }
-          />
-          <Route
-            path="/evolution"
-            element={
-              <EvolutionPage
-                skills={skills}
-                hasSkillAchievement={hasSkillAchievement}
-                isExplorer={isExplorer}
-              />
-            }
-          />
-        </Routes>
+        {loading ? (
+          <p role="status">Carregando sua jornada...</p>
+        ) : loadError ? (
+          <p role="alert">
+            Não foi possível carregar os dados.{` ${loadError}`}
+          </p>
+        ) : (
+          <Routes>
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route
+              path="/"
+              element={
+                <DashboardPage
+                  summaryData={summaryData}
+                />
+              }
+            />
+            <Route
+              path="/missions"
+              element={
+                <MissionsPage
+                  missions={missions}
+                  editingMission={editingMission}
+                  addMission={addMission}
+                  updateMission={updateMission}
+                  deleteMission={deleteMission}
+                  toggleMission={toggleMission}
+                  setEditingMission={setEditingMission}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  statusFilter={statusFilter}
+                  setStatusFilter={setStatusFilter}
+                  technologyFilter={technologyFilter}
+                  setTechnologyFilter={setTechnologyFilter}
+                  difficultyFilter={difficultyFilter}
+                  setDifficultyFilter={setDifficultyFilter}
+                  sortOrder={sortOrder}
+                  setSortOrder={setSortOrder}
+                  filteredMissions={filteredMissions}
+                  sortedMissions={sortedMissions}
+                />
+              }
+            />
+            <Route
+              path="/projects"
+              element={
+                <ProjectsPage
+                  projects={projects}
+                  editingProject={editingProject}
+                  addProject={addProject}
+                  updateProject={updateProject}
+                  deleteProject={deleteProject}
+                  setEditingProject={setEditingProject}
+                  importRepository={importRepository}
+                />
+              }
+            />
+            <Route
+              path="/evolution"
+              element={
+                <EvolutionPage
+                  skills={skills}
+                  hasSkillAchievement={hasSkillAchievement}
+                  isExplorer={isExplorer}
+                />
+              }
+            />
+          </Routes>
+        )}
       </div>
       <Footer />
     </main>
