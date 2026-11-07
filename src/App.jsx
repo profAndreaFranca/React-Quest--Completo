@@ -287,7 +287,12 @@ function App() {
       <Header />
       <Navigation />
       <div className="dashboard">
-        <button type="button" onClick={refreshData} disabled={loading}>
+        <button
+          type="button"
+          className="refresh-button"
+          onClick={refreshData}
+          disabled={loading}
+        >
           {loading ? "Atualizando..." : "Atualizar dados"}
         </button>
         {loading ? (

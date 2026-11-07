@@ -19,6 +19,25 @@
   margin-top: 32px;
 }
 
+.refresh-button {
+  padding: 11px 20px;
+  border: none;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.refresh-button:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.refresh-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .summary-section h2 {
   margin-bottom: 16px;
 }
