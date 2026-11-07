@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "./services/supabaseClient";
 import { Routes, Route } from "react-router";
 import Navigation from "./components/Navigation";
@@ -36,62 +36,66 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
 
-  useEffect(() => {
-    let active = true;
+  const loadRequest = useRef(0);
 
-    async function loadData() {
-      setLoading(true);
-      setLoadError("");
+  const loadData = useCallback(() => {
+    const requestId = ++loadRequest.current;
 
-      try {
-        const [projectsResult, missionsResult] = await Promise.all([
-          supabase.from("projects").select("*").order("created_at", { ascending: true }),
-          supabase.from("missions").select("*").order("created_at", { ascending: true }),
-        ]);
+    return Promise.all([
+      supabase.from("projects").select("*").order("created_at", { ascending: true }),
+      supabase.from("missions").select("*").order("created_at", { ascending: true }),
+    ]).then(([projectsResult, missionsResult]) => {
 
-        if (projectsResult.error) throw projectsResult.error;
-        if (missionsResult.error) throw missionsResult.error;
+      if (projectsResult.error) throw projectsResult.error;
+      if (missionsResult.error) throw missionsResult.error;
 
-        const formattedProjects = (projectsResult.data || []).map((project) => ({
-          id: project.id,
-          title: project.title,
-          description: project.description,
-          technologies: project.technologies || [],
-          status: project.status,
-          githubUrl: project.github_url || "",
-          deployUrl: project.deploy_url || "",
-        }));
+      const formattedProjects = (projectsResult.data || []).map((project) => ({
+        id: project.id,
+        title: project.title,
+        description: project.description,
+        technologies: project.technologies || [],
+        status: project.status,
+        githubUrl: project.github_url || "",
+        deployUrl: project.deploy_url || "",
+      }));
 
-        const formattedMissions = (missionsResult.data || []).map((mission) => ({
-          id: mission.id,
-          title: mission.title,
-          description: mission.description,
-          technology: mission.technology,
-          difficulty: mission.difficulty,
-          xp: mission.xp,
-          completed: mission.completed,
-        }));
+      const formattedMissions = (missionsResult.data || []).map((mission) => ({
+        id: mission.id,
+        title: mission.title,
+        description: mission.description,
+        technology: mission.technology,
+        difficulty: mission.difficulty,
+        xp: mission.xp,
+        completed: mission.completed,
+      }));
 
-        if (!active) return;
-        setProjects(formattedProjects);
-        setMissions(formattedMissions);
-      } catch (error) {
-        if (active) {
-          setLoadError(
-            error instanceof Error ? error.message : "Erro ao carregar os dados.",
-          );
-        }
-      } finally {
-        if (active) setLoading(false);
+      if (requestId !== loadRequest.current) return;
+      setProjects(formattedProjects);
+      setMissions(formattedMissions);
+    }).catch((error) => {
+      if (requestId === loadRequest.current) {
+        setLoadError(
+          error instanceof Error ? error.message : "Erro ao carregar os dados.",
+        );
       }
-    }
+    }).finally(() => {
+      if (requestId === loadRequest.current) setLoading(false);
+    });
+  }, []);
 
+  useEffect(() => {
     loadData();
 
     return () => {
-      active = false;
+      loadRequest.current += 1;
     };
-  }, []);
+  }, [loadData]);
+
+  function refreshData() {
+    setLoading(true);
+    setLoadError("");
+    loadData();
+  }
 
   // Funções para manipular missões
   function toggleMission(missionId) {
@@ -283,6 +287,9 @@ function App() {
       <Header />
       <Navigation />
       <div className="dashboard">
+        <button type="button" onClick={refreshData} disabled={loading}>
+          {loading ? "Atualizando..." : "Atualizar dados"}
+        </button>
         {loading ? (
           <p role="status">Carregando sua jornada...</p>
         ) : loadError ? (
