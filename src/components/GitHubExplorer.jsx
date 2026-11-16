@@ -8,6 +8,7 @@ function GitHubExplorer({ projects, onImportRepository }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
+  const [importingId, setImportingId] = useState(null);
 
   async function searchRepositories() {
     setHasSearched(true);
@@ -62,15 +63,32 @@ function GitHubExplorer({ projects, onImportRepository }) {
     (a, b) => b.stargazers_count - a.stargazers_count,
   );
 
-  function handleImport(repository) {
-    const imported = onImportRepository(repository);
+  async function handleImport(repository) {
+    if (importingId !== null) return;
 
-    if (!imported) {
-      window.alert("Este repositório já está no portfólio.");
-      return;
+    setImportingId(repository.id);
+
+    try {
+      const result =
+        await onImportRepository(repository);
+
+      if (result === "duplicate") {
+        window.alert(
+          "Este repositório já está no portfólio."
+        );
+      }
+
+      if (result === "success") {
+        window.alert(
+          "Projeto importado e salvo com sucesso!"
+        );
+      }
+
+      // Caso result seja "error",
+      // addProject já apresentou o erro.
+    } finally {
+      setImportingId(null);
     }
-
-    window.alert("Projeto importado com sucesso!");
   }
 
   return (
@@ -127,6 +145,8 @@ function GitHubExplorer({ projects, onImportRepository }) {
                 repository={repository}
                 onImport={handleImport}
                 isImported={isImported}
+                isImporting={importingId === repository.id}
+                importDisabled={importingId !== null}
               />
             );
           })}

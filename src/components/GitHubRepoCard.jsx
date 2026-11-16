@@ -1,6 +1,6 @@
 import "./GitHubRepoCard.css";
 
-function GitHubRepoCard({ repository, onImport, isImported }) {
+function GitHubRepoCard({ repository, onImport, isImported, isImporting, importDisabled }) {
   return (
     <article className="github-repo-card">
       <h3>{repository.name}</h3>
@@ -19,10 +19,14 @@ function GitHubRepoCard({ repository, onImport, isImported }) {
       <button
         type="button"
         onClick={() => onImport(repository)}
-        disabled={isImported}
+        disabled={isImported || importDisabled}
         className="github-repo-card__import"
       >
-        {isImported ? "✓ Já importado" : "Importar para o portfólio"}
+        {isImported
+          ? "✓ Já importado"
+          : isImporting
+            ? "Importando..."
+            : "Importar para o portfólio"}
       </button>
     </article>
   );

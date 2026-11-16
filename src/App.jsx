@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "./services/supabaseClient";
+import LabAccess from "./components/LabAccess";
+import { createProject, saveProject, removeProject, fromProjectRow } from "./services/projectService";
+import { createMission, saveMission, removeMission, setMissionCompleted, fromMissionRow } from "./services/missionService";
 import { Routes, Route } from "react-router";
 import Navigation from "./components/Navigation";
 import DashboardPage from "./pages/DashboardPage";
@@ -13,7 +16,6 @@ import Footer from "./components/Footer";
 
 function createProjectFromRepository(repository) {
   return {
-    id: crypto.randomUUID(),
     title: repository.name,
     description: repository.description || "Projeto importado do GitHub.",
     technologies: repository.language ? [repository.language] : [],
@@ -35,6 +37,9 @@ function App() {
   const [editingProject, setEditingProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [session, setSession] = useState(null);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionError, setSessionError] = useState("");
 
   const loadRequest = useRef(0);
 
@@ -49,25 +54,8 @@ function App() {
       if (projectsResult.error) throw projectsResult.error;
       if (missionsResult.error) throw missionsResult.error;
 
-      const formattedProjects = (projectsResult.data || []).map((project) => ({
-        id: project.id,
-        title: project.title,
-        description: project.description,
-        technologies: project.technologies || [],
-        status: project.status,
-        githubUrl: project.github_url || "",
-        deployUrl: project.deploy_url || "",
-      }));
-
-      const formattedMissions = (missionsResult.data || []).map((mission) => ({
-        id: mission.id,
-        title: mission.title,
-        description: mission.description,
-        technology: mission.technology,
-        difficulty: mission.difficulty,
-        xp: mission.xp,
-        completed: mission.completed,
-      }));
+      const formattedProjects = (projectsResult.data || []).map(fromProjectRow);
+      const formattedMissions = (missionsResult.data || []).map(fromMissionRow);
 
       if (requestId !== loadRequest.current) return;
       setProjects(formattedProjects);
@@ -84,12 +72,50 @@ function App() {
   }, []);
 
   useEffect(() => {
+    let active = true;
+
+    async function checkSession() {
+      try {
+        const { data, error } =
+          await supabase.auth.getSession();
+
+        if (error) throw error;
+
+        if (active) {
+          setSession(data.session);
+        }
+      } catch (err) {
+        if (active) {
+          setSessionError(
+            err?.message ||
+              "Erro ao verificar a sessão."
+          );
+        }
+      } finally {
+        if (active) {
+          setCheckingSession(false);
+        }
+      }
+    }
+
+    checkSession();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const userId = session?.user?.id;
+
+  useEffect(() => {
+    if (!userId) return;
+
     loadData();
 
     return () => {
       loadRequest.current += 1;
     };
-  }, [loadData]);
+  }, [loadData, userId]);
 
   function refreshData() {
     setLoading(true);
@@ -98,45 +124,155 @@ function App() {
   }
 
   // Funções para manipular missões
-  function toggleMission(missionId) {
-    const updatedMissions = missions.map((mission) => {
-      if (mission.id === missionId) {
-        return {
-          ...mission,
-          completed: !mission.completed,
-        };
-      }
-      return mission;
-    });
-    setMissions(updatedMissions);
-  }
-
-  function addMission(newMission) {
-    setMissions([...missions, newMission]);
-  }
-
-  function updateMission(updatedMission) {
-    const updatedMissions = missions.map((mission) =>
-      mission.id === updatedMission.id ? updatedMission : mission,
+  async function toggleMission(missionId) {
+    const mission = missions.find(
+      (item) => item.id === missionId
     );
 
-    setMissions(updatedMissions);
-    setEditingMission(null);
+    if (!mission) return false;
+
+    try {
+      const savedMission =
+        await setMissionCompleted(
+          mission.id,
+          !mission.completed
+        );
+
+      setMissions((previousMissions) =>
+        previousMissions.map((item) =>
+          item.id === savedMission.id
+            ? savedMission
+            : item
+        )
+      );
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      window.alert(
+        error?.message ||
+          "Não foi possível atualizar a missão."
+      );
+
+      return false;
+    }
   }
 
-  function deleteMission(missionId) {
-    const updatedMissions = missions.filter(
-      (mission) => mission.id !== missionId,
+  async function addMission(newMission) {
+    try {
+      const savedMission =
+        await createMission(newMission);
+
+      setMissions((previousMissions) => [
+        ...previousMissions,
+        savedMission,
+      ]);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      window.alert(
+        error?.message ||
+          "Não foi possível cadastrar a missão."
+      );
+
+      return false;
+    }
+  }
+
+  async function updateMission(updatedMission) {
+    try {
+      const savedMission =
+        await saveMission(updatedMission);
+
+      setMissions((previousMissions) =>
+        previousMissions.map((mission) =>
+          mission.id === savedMission.id
+            ? savedMission
+            : mission
+        )
+      );
+
+      setEditingMission(null);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      window.alert(
+        error?.message ||
+          "Não foi possível editar a missão."
+      );
+
+      return false;
+    }
+  }
+
+  async function deleteMission(missionId) {
+    const shouldDelete = window.confirm(
+      "Deseja realmente excluir esta missão?"
     );
 
-    setMissions(updatedMissions);
+    if (!shouldDelete) return false;
+
+    try {
+      const deletedId =
+        await removeMission(missionId);
+
+      setMissions((previousMissions) =>
+        previousMissions.filter(
+          (mission) => mission.id !== deletedId
+        )
+      );
+
+      setEditingMission((currentMission) =>
+        currentMission?.id === deletedId
+          ? null
+          : currentMission
+      );
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      window.alert(
+        error?.message ||
+          "Não foi possível excluir a missão."
+      );
+
+      return false;
+    }
   }
   // Funções para manipular projetos
-  function addProject(newProject) {
-    setProjects([...projects, newProject]);
+  async function addProject(newProject) {
+    try {
+      const savedProject =
+        await createProject(newProject);
+
+      setProjects((previousProjects) => [
+        ...previousProjects,
+        savedProject,
+      ]);
+
+      return true;
+    } catch (error) {
+      console.error(
+        "Erro ao cadastrar projeto:",
+        error
+      );
+
+      window.alert(
+        error?.message ||
+          "Não foi possível cadastrar o projeto."
+      );
+
+      return false;
+    }
   }
 
-  function importRepository(repository) {
+  async function importRepository(repository) {
     const normalizeUrl = (url) =>
       (url || "")
         .trim()
@@ -144,47 +280,90 @@ function App() {
         .replace(/\.git$/i, "")
         .toLowerCase();
 
-    const repositoryUrl = normalizeUrl(repository.html_url);
+    const repositoryUrl = normalizeUrl(
+      repository.html_url
+    );
 
     const alreadyExists = projects.some(
-      (project) => normalizeUrl(project.githubUrl) === repositoryUrl,
+      (project) =>
+        normalizeUrl(project.githubUrl) ===
+        repositoryUrl
     );
 
     if (alreadyExists) {
-      return false;
+      return "duplicate";
     }
 
-    const newProject = createProjectFromRepository(repository);
-    addProject(newProject);
-    return true;
+    const newProject =
+      createProjectFromRepository(repository);
+
+    const success = await addProject(newProject);
+
+    return success ? "success" : "error";
   }
 
-  function deleteProject(projectId) {
+  async function deleteProject(projectId) {
+    const shouldDelete = window.confirm(
+      "Deseja realmente excluir este projeto?"
+    );
 
-    const shouldDelete =
-      window.confirm(
-        "Deseja realmente excluir este projeto?"
+    if (!shouldDelete) return false;
+
+    try {
+      const deletedId =
+        await removeProject(projectId);
+
+      setProjects((previousProjects) =>
+        previousProjects.filter(
+          (project) => project.id !== deletedId
+        )
       );
 
-    if (!shouldDelete) {
-      return;
-    }
-    
-    const updatedProjects = projects.filter(
-      (project) => project.id !== projectId,
-    );
+      setEditingProject((currentProject) =>
+        currentProject?.id === deletedId
+          ? null
+          : currentProject
+      );
 
-    setProjects(updatedProjects);
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      window.alert(
+        error?.message ||
+          "Não foi possível excluir o projeto."
+      );
+
+      return false;
+    }
   }
 
-  function updateProject(updatedProject) {
-    const updatedProjects = projects.map((project) =>
-      project.id === updatedProject.id ? updatedProject : project,
-    );
+  async function updateProject(updatedProject) {
+    try {
+      const savedProject =
+        await saveProject(updatedProject);
 
-    setProjects(updatedProjects);
+      setProjects((previousProjects) =>
+        previousProjects.map((project) =>
+          project.id === savedProject.id
+            ? savedProject
+            : project
+        )
+      );
 
-    setEditingProject(null);
+      setEditingProject(null);
+
+      return true;
+    } catch (error) {
+      console.error(error);
+
+      window.alert(
+        error?.message ||
+          "Não foi possível editar o projeto."
+      );
+
+      return false;
+    }
   }
 
   const completedMissions = missions.filter((mission) => mission.completed);
@@ -281,6 +460,50 @@ function App() {
 
     return b.xp - a.xp; //maior para o menor
   });
+
+  if (checkingSession) {
+    return (
+      <main className="app">
+        <Header />
+        <p role="status">
+          Verificando acesso ao laboratório...
+        </p>
+        <Footer />
+      </main>
+    );
+  }
+
+  if (sessionError) {
+    return (
+      <main className="app">
+        <Header />
+        <p role="alert">{sessionError}</p>
+
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+        >
+          Tentar novamente
+        </button>
+
+        <Footer />
+      </main>
+    );
+  }
+
+  if (!session) {
+    return (
+      <main className="app">
+        <Header />
+
+        <LabAccess
+          onAuthenticated={setSession}
+        />
+
+        <Footer />
+      </main>
+    );
+  }
 
   return (
     <main className="app">

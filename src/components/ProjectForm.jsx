@@ -9,6 +9,8 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
   const [githubUrl, setGithubUrl] = useState("");
   const [deployUrl, setDeployUrl] = useState("");
 
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     if (editingProject) {
       setTitle(editingProject.title);
@@ -20,42 +22,69 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
     }
   }, [editingProject]);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
+    if (saving) return;
+
+    if (!title.trim()) {
+      alert("Informe o título do projeto.");
+      return;
+    }
+
     if (
-      (githubUrl && !githubUrl.startsWith("http://") && !githubUrl.startsWith("https://")) ||
-      (deployUrl && !deployUrl.startsWith("http://") && !deployUrl.startsWith("https://"))
+      (
+        githubUrl &&
+        !githubUrl.startsWith("http://") &&
+        !githubUrl.startsWith("https://")
+      ) ||
+      (
+        deployUrl &&
+        !deployUrl.startsWith("http://") &&
+        !deployUrl.startsWith("https://")
+      )
     ) {
-      alert("As URLs devem começar com http:// ou https://. Você também pode deixar os campos vazios.");
+      alert(
+        "As URLs devem começar com http:// ou https://."
+      );
       return;
     }
 
     const newProject = {
-      id: Date.now(),
       title,
       description,
-      technologies: technologies.split(",").map((tech) => tech.trim()),
+
+      technologies: technologies
+        .split(",")
+        .map((tech) => tech.trim())
+        .filter(Boolean),
+
       status,
       githubUrl,
       deployUrl,
     };
 
-    if (editingProject) {
-      onUpdateProject({
-        ...newProject,
-        id: editingProject.id,
-      });
-    } else {
-      onAddProject(newProject);
-    }
+    setSaving(true);
 
-    setTitle("");
-    setDescription("");
-    setTechnologies("");
-    setStatus("Em andamento");
-    setGithubUrl("");
-    setDeployUrl("");
+    try {
+      const success = editingProject
+        ? await onUpdateProject({
+            ...newProject,
+            id: editingProject.id,
+          })
+        : await onAddProject(newProject);
+
+      if (!success) return;
+
+      setTitle("");
+      setDescription("");
+      setTechnologies("");
+      setStatus("Em andamento");
+      setGithubUrl("");
+      setDeployUrl("");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -130,8 +159,16 @@ function ProjectForm({ onAddProject, editingProject, onUpdateProject }) {
           />
         </div>
 
-        <button type="submit" className="project-form__button">
-          {editingProject ? "Salvar alterações" : "Adicionar projeto"}
+        <button
+          type="submit"
+          className="project-form__button"
+          disabled={saving}
+        >
+          {saving
+            ? "Salvando..."
+            : editingProject
+              ? "Salvar alterações"
+              : "Adicionar projeto"}
         </button>
       </form>
     </section>

@@ -8,6 +8,8 @@ function MissionForm({ onAddMission, editingMission, onUpdateMission }) {
   const [difficulty, setDifficulty] = useState("Fácil");
   const [xp, setXp] = useState(50);
 
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     if (editingMission) {
       setTitle(editingMission.title);
@@ -18,16 +20,19 @@ function MissionForm({ onAddMission, editingMission, onUpdateMission }) {
     }
   }, [editingMission]);
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
 
+    if (saving) return;
+
     if (!title.trim() || !description.trim()) {
-      alert("Preencha o título e a descrição da missão.");
+      alert(
+        "Preencha o título e a descrição da missão."
+      );
       return;
     }
 
     const newMission = {
-      id: Date.now(),
       title,
       description,
       technology,
@@ -36,21 +41,27 @@ function MissionForm({ onAddMission, editingMission, onUpdateMission }) {
       completed: false,
     };
 
-    if (editingMission) {
-      onUpdateMission({
-        ...newMission,
-        id: editingMission.id,
-        completed: editingMission.completed,
-      });
-    } else {
-      onAddMission(newMission);
-    }
+    setSaving(true);
 
-    setTitle("");
-    setDescription("");
-    setTechnology("React");
-    setDifficulty("Fácil");
-    setXp(50);
+    try {
+      const success = editingMission
+        ? await onUpdateMission({
+            ...newMission,
+            id: editingMission.id,
+            completed: editingMission.completed,
+          })
+        : await onAddMission(newMission);
+
+      if (!success) return;
+
+      setTitle("");
+      setDescription("");
+      setTechnology("React");
+      setDifficulty("Fácil");
+      setXp(50);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -126,8 +137,16 @@ function MissionForm({ onAddMission, editingMission, onUpdateMission }) {
           />
         </div>
 
-        <button type="submit" className="mission-form__button">
-          {editingMission ? "Salvar alterações" : "Adicionar missão"}
+        <button
+          type="submit"
+          className="mission-form__button"
+          disabled={saving}
+        >
+          {saving
+            ? "Salvando..."
+            : editingMission
+              ? "Salvar alterações"
+              : "Adicionar missão"}
         </button>
       </form>
     </section>
