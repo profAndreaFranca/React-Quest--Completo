@@ -220,3 +220,14 @@
   margin: 4px 0 0;
   opacity: 0.7;
 }
+
+.operation-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}

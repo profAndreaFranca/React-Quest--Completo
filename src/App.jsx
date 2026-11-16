@@ -37,6 +37,7 @@ function App() {
   const [editingProject, setEditingProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [feedback, setFeedback] = useState("");
   const [session, setSession] = useState(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [sessionError, setSessionError] = useState("");
@@ -256,6 +257,8 @@ function App() {
         savedProject,
       ]);
 
+      setFeedback("Projeto cadastrado com sucesso!");
+
       return true;
     } catch (error) {
       console.error(
@@ -325,6 +328,8 @@ function App() {
           : currentProject
       );
 
+      setFeedback("Projeto excluído com sucesso!");
+
       return true;
     } catch (error) {
       console.error(error);
@@ -352,6 +357,8 @@ function App() {
       );
 
       setEditingProject(null);
+
+      setFeedback("Projeto atualizado com sucesso!");
 
       return true;
     } catch (error) {
@@ -510,6 +517,14 @@ function App() {
       <Header />
       <Navigation />
       <div className="dashboard">
+        {feedback && (
+          <div className="operation-feedback">
+            <p role="status">{feedback}</p>
+            <button type="button" onClick={() => setFeedback("")}>
+              Fechar
+            </button>
+          </div>
+        )}
         <button
           type="button"
           className="refresh-button"
